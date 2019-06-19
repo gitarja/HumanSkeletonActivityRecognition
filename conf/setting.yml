@@ -1,0 +1,18 @@
+DIR_MOCAP: "D:/usr/pras/data/HumanActivity/Mocap/"
+DIR_MOCAP_RESULT: "D:/usr/pras/data/HumanActivity/Mocap/SkeletalData/"
+DIR_MOCAP_NORMALIZED_RESULT: "D:/usr/pras/data/HumanActivity/Mocap/SkeletalData_normalized/"
+DIR_MSR: "D:/usr/pras/data/HumanActivity/MSR/"
+DIR_MSR_RESULT: "D:/usr/pras/data/HumanActivity/MSR/SkeletalData/"
+DIR_MSR_NORMALIZED_RESULT: "D:/usr/pras/data/HumanActivity/MSR/SkeletalData_normalized/"
+HBRNN_CONFIG:
+  BATCH_SIZE: 32
+  VALIDATION_BATCH_SIZE: 25
+  TRAINDATASET: "train.csv"
+  TESTDATASET: "test.csv"
+  CHECK_POINT_DIR: "D:/usr/pras/result/human-activity/mocap/models/"
+  TENSORBOARD_DIR: "D:/usr/pras/result/human-activity/mocap/tensorboard/"
+  RNN_UNITS: [15, 30, 60, 60]
+  N_CLASS: 11
+  DROPOUT: [0.3, 0.5]
+  T: 15
+
