@@ -22,15 +22,15 @@ class CFGRNN(K.models.Model):
         n = Not
         '''
         self.lh = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="LH"), merge_mode="concat")
+            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="LH"), merge_mode="ave")
         self.rh = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="RH"), merge_mode="concat")
+            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="RH"), merge_mode="ave")
         self.lf = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="LF"), merge_mode="concat")
+            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="LF"), merge_mode="ave")
         self.rf = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="RF"), merge_mode="concat")
+            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="RF"), merge_mode="ave")
         self.t = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="T"), merge_mode="concat")
+            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="T"), merge_mode="ave")
 
         self.mF = K.layers.Bidirectional(
             K.layers.SimpleRNN(units=conf["un_operator"]["units"], return_sequences=True, name="mF"),
@@ -213,23 +213,23 @@ class CFGRNN(K.models.Model):
 
     def AND(self, x1, x2, end=None):
         end = self.NONE(x1, end)
-        return self.and_op(self.concat([x1, x2, end]))
+        return self.and_op(tf.reduce_mean([x1, x2, end], axis=0))
 
     def OR(self, x1, x2, end=None):
         end = self.NONE(x1, end)
-        return self.or_op(self.concat([x1, x2, end]))
+        return self.or_op(tf.reduce_mean([x1, x2, end], axis=0))
 
     def TOUCH(self, x1, x2, end=None):
         end = self.NONE(x1, end)
-        return self.touch_op(self.concat([x1, x2, end]))
+        return self.touch_op(tf.reduce_mean([x1, x2, end], axis=0))
 
     def THEN(self, x1, x2, end=None):
         end = self.NONE(x1, end)
-        return self.then_op(self.concat([x1, x2, end]))
+        return self.then_op(tf.reduce_mean([x1, x2, end], axis=0))
 
     def WITH(self, x1, end=None):
         end = self.NONE(x1, end)
-        return self.with_op(self.concat([x1, end]))
+        return self.with_op(tf.reduce_mean([x1, end], axis=0))
 
 
     def NONE(self,x, end):
