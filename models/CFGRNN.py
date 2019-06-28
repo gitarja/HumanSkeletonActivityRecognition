@@ -155,7 +155,7 @@ class CFGRNN(K.models.Model):
         lh = self.lh(lh)
         rh = self.rh(rh)
 
-        E = self.TOUCH(lh, self.AND(self.forward(lh), self.forward(rh)), rh)
+        E = self.TOUCH(self.forward(lh), self.forward(rh))
 
         return E
 
