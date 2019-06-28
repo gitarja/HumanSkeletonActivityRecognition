@@ -62,8 +62,46 @@ with summary_writer.as_default(), summary.always_record_summaries():
             x, t = skeleton_generator_train.getFlow(h)
 
             with tf.GradientTape() as tape:
+                with tf.device('/device:GPU:0'):
+                    y_jump = cfgRNN.action(x, action="jumping")
+                    y_jumpJ =cfgRNN.action(x, action="jumpingJ")
+                    y_wav = cfgRNN.action(x, action="waving")
+                    y_wavR = cfgRNN.action(x, action="wavingR")
+                    y_clap = cfgRNN.action(x, action="clap")
+                    y_punch = cfgRNN.action(x, action="punching")
+                    y_bend = cfgRNN.action(x, action="bending")
+                    y_throw = cfgRNN.action(x, action="throwing")
+                    y_sitdown = cfgRNN.action(x, action="sitDown")
+                    y_standUp = cfgRNN.action(x, action="standUp")
+                    y_sitTstand = cfgRNN.action(x, action="sitDownTstandUp")
+
+                with tf.device('/device:GPU:1'):
+                    y = tf.concat(
+                        [y_jump, y_jumpJ, y_bend, y_punch, y_wav, y_wavR, y_clap, y_throw, y_sitTstand, y_sitdown, y_standUp
+                         ], axis=-1)
+
+                    y_prob = tf.nn.softmax(y)
+
+                    # print(t)
+
+                    loss = tf.losses.softmax_cross_entropy(logits=y, onehot_labels=t)
+
+                    training_acc += tf.reduce_mean(
+                        tf.cast(tf.equal(tf.argmax(y_prob, 1), tf.argmax(t, 1)), dtype=tf.float32))
+
+                    variables = cfgRNN.trainable_variables
+                    grads = tape.gradient(loss, variables)
+
+                    clipped_grads = [tf.clip_by_norm(g, 1.) for g in grads]
+                    optimizer.apply_gradients(zip(clipped_grads, variables),
+                                              global_step=tf.train.get_or_create_global_step())
+            training_loss += loss
+
+        for h in range(skeleton_generator_test.num_batch):
+            x, t = skeleton_generator_test.getFlow(h)
+            with tf.device('/device:GPU:2'):
                 y_jump = cfgRNN.action(x, action="jumping")
-                y_jumpJ =cfgRNN.action(x, action="jumpingJ")
+                y_jumpJ = cfgRNN.action(x, action="jumpingJ")
                 y_wav = cfgRNN.action(x, action="waving")
                 y_wavR = cfgRNN.action(x, action="wavingR")
                 y_clap = cfgRNN.action(x, action="clap")
@@ -74,50 +112,16 @@ with summary_writer.as_default(), summary.always_record_summaries():
                 y_standUp = cfgRNN.action(x, action="standUp")
                 y_sitTstand = cfgRNN.action(x, action="sitDownTstandUp")
 
+            with tf.device('/device:GPU:3'):
                 y = tf.concat(
                     [y_jump, y_jumpJ, y_bend, y_punch, y_wav, y_wavR, y_clap, y_throw, y_sitTstand, y_sitdown, y_standUp
                      ], axis=-1)
 
                 y_prob = tf.nn.softmax(y)
+                validation_loss += tf.losses.softmax_cross_entropy(logits=y, onehot_labels=t)
 
-                # print(t)
-
-                loss = tf.losses.softmax_cross_entropy(logits=y, onehot_labels=t)
-
-                training_acc += tf.reduce_mean(
+                validation_acc += tf.reduce_mean(
                     tf.cast(tf.equal(tf.argmax(y_prob, 1), tf.argmax(t, 1)), dtype=tf.float32))
-
-                variables = cfgRNN.trainable_variables
-                grads = tape.gradient(loss, variables)
-
-                clipped_grads = [tf.clip_by_norm(g, 1.) for g in grads]
-                optimizer.apply_gradients(zip(clipped_grads, variables),
-                                          global_step=tf.train.get_or_create_global_step())
-            training_loss += loss
-
-        for h in range(skeleton_generator_test.num_batch):
-            x, t = skeleton_generator_test.getFlow(h)
-            y_jump = cfgRNN.action(x, action="jumping")
-            y_jumpJ = cfgRNN.action(x, action="jumpingJ")
-            y_wav = cfgRNN.action(x, action="waving")
-            y_wavR = cfgRNN.action(x, action="wavingR")
-            y_clap = cfgRNN.action(x, action="clap")
-            y_punch = cfgRNN.action(x, action="punching")
-            y_bend = cfgRNN.action(x, action="bending")
-            y_throw = cfgRNN.action(x, action="throwing")
-            y_sitdown = cfgRNN.action(x, action="sitDown")
-            y_standUp = cfgRNN.action(x, action="standUp")
-            y_sitTstand = cfgRNN.action(x, action="sitDownTstandUp")
-
-            y = tf.concat(
-                [y_jump, y_jumpJ, y_bend, y_punch, y_wav, y_wavR, y_clap, y_throw, y_sitTstand, y_sitdown, y_standUp
-                 ], axis=-1)
-
-            y_prob = tf.nn.softmax(y)
-            validation_loss += tf.losses.softmax_cross_entropy(logits=y, onehot_labels=t)
-
-            validation_acc += tf.reduce_mean(
-                tf.cast(tf.equal(tf.argmax(y_prob, 1), tf.argmax(t, 1)), dtype=tf.float32))
 
         training_loss = training_loss / skeleton_generator_train.num_batch
         training_acc = training_acc / skeleton_generator_train.num_batch
