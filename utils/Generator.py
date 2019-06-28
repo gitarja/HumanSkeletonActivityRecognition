@@ -12,6 +12,7 @@ class Generator:
         self.data_set = pd.read_csv(dataset_path)
         self.lb = preprocessing.LabelBinarizer()
         self.lb.fit(range(1, n_class + 1))
+        #self.lb.fit([1, 2, 5, 6])
         self.len_data = len(self.data_set.index)
         self.num_batch = math.ceil(self.len_data / self.batch_size)
         self.arr = range(self.num_batch)

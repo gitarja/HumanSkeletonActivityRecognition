@@ -56,7 +56,7 @@ status = check_point.restore(manager.latest_checkpoint)
 summary_writer = summary.create_file_writer(TENSORBOARD_DIR)
 
 with summary_writer.as_default(), summary.always_record_summaries():
-    for i in range(NUM_ITER):
+    for i in range(1, NUM_ITER):
         training_loss = 0
         training_acc = 0
         validation_loss = 0
@@ -70,11 +70,12 @@ with summary_writer.as_default(), summary.always_record_summaries():
                 # logits = tf.reduce_sum(tf.reduce_mean([y0, y1], axis=0), axis=1)
                 y = tf.reduce_mean(y, axis=1)
                 y_prob = tf.nn.softmax(y)
+
                 loss = tf.losses.softmax_cross_entropy(logits=y, onehot_labels=t)
-                #print(loss)
 
                 training_acc += tf.reduce_mean(
                     tf.cast(tf.equal(tf.argmax(y_prob, 1), tf.argmax(t, 1)), dtype=tf.float32))
+
                 variables = teacher_model.trainable_variables
                 grads = tape.gradient(loss, variables)
 
@@ -88,11 +89,10 @@ with summary_writer.as_default(), summary.always_record_summaries():
             # logits = tf.reduce_sum(tf.reduce_mean([y0, y1], axis=0), axis=1)
             y = tf.reduce_mean(y, axis=1)
             y_prob = tf.nn.softmax(y)
-
             validation_loss += tf.losses.softmax_cross_entropy(logits=y, onehot_labels=t)
 
             validation_acc += tf.reduce_mean(
-                tf.cast(tf.equal(tf.argmax(y_prob, 1), tf.argmax(t, 1)), dtype=tf.float32))
+                    tf.cast(tf.equal(tf.argmax(y_prob, 1), tf.argmax(t, 1)), dtype=tf.float32))
 
 
 
@@ -100,22 +100,25 @@ with summary_writer.as_default(), summary.always_record_summaries():
         training_acc = training_acc / skeleton_generator_train.num_batch
         validation_loss = validation_loss / skeleton_generator_test.num_batch
         validation_acc = validation_acc / skeleton_generator_test.num_batch
-        print("Loss =  %f, accuracy = %f, validation loss = %f, validation accuracy = %f" % (training_loss, training_acc, validation_loss, validation_acc))
+        print("Itteration = %f, Loss =  %f, accuracy = %f, validation loss = %f, validation accuracy = %f" % (i, training_loss, training_acc, validation_loss, validation_acc))
         summary.scalar("validation_loss", validation_loss, step=tf.train.get_or_create_global_step())
         summary.scalar("training_loss", training_loss, step=tf.train.get_or_create_global_step())
 
         summary.scalar("training_acc", training_acc, step=tf.train.get_or_create_global_step())
         summary.scalar("validation_acc", validation_acc, step=tf.train.get_or_create_global_step())
 
-        if validation_loss < THRESHOLD_LOSS or i == 1:
-            manager.save()
-            THRESHOLD_LOSS = validation_loss
-            PREV_BEST = i
 
-        if (i+1) % 25 == 0:
-            optimizer._lr = optimizer._lr * math.sqrt(0.5)
+
+        if (i - PREV_BEST) % 5 == 0 or i == 15:
+            print("Learning rate is changed")
+            optimizer._lr = optimizer._lr * math.sqrt(0.2)
 
 
         if (i - PREV_BEST) > 15:
             break
+
+        if validation_loss < THRESHOLD_LOSS or i == 1:
+            manager.save()
+            THRESHOLD_LOSS = validation_loss
+            PREV_BEST = i
 

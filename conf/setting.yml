@@ -4,15 +4,35 @@ DIR_MOCAP_NORMALIZED_RESULT: "D:/usr/pras/data/HumanActivity/Mocap/SkeletalData_
 DIR_MSR: "D:/usr/pras/data/HumanActivity/MSR/"
 DIR_MSR_RESULT: "D:/usr/pras/data/HumanActivity/MSR/SkeletalData/"
 DIR_MSR_NORMALIZED_RESULT: "D:/usr/pras/data/HumanActivity/MSR/SkeletalData_normalized/"
+DIR_YOLO_WEIGHTS: "D:/usr/pras/data/yolo-weights/OPT-YOLO-custom.weights"
+DIR_YOLO_CFG: "D:/usr/pras/data/yolo-weights/OPT-YOLO-custom.cfg"
 HBRNN_CONFIG:
   BATCH_SIZE: 32
   VALIDATION_BATCH_SIZE: 25
   TRAINDATASET: "train.csv"
   TESTDATASET: "test.csv"
-  CHECK_POINT_DIR: "D:/usr/pras/result/human-activity/mocap/models/"
-  TENSORBOARD_DIR: "D:/usr/pras/result/human-activity/mocap/tensorboard/"
-  RNN_UNITS: [15, 30, 60, 60]
+  CHECK_POINT_DIR: "D:/usr/pras/result/human-activity/mocap/models_hbrnn/"
+  TENSORBOARD_DIR: "D:/usr/pras/result/human-activity/mocap/tensorboard_hbrnn/"
+  RNN_UNITS: [30, 30, 60, 60]
   N_CLASS: 11
   DROPOUT: [0.3, 0.5]
-  T: 15
+  T: 20
+CFGRNN_CONFIG:
+  BATCH_SIZE: 32
+  VALIDATION_BATCH_SIZE: 25
+  TRAINDATASET: "train.csv"
+  TESTDATASET: "test.csv"
+  CHECK_POINT_DIR: "D:/usr/pras/result/human-activity/mocap/models_cfgrnn/"
+  TENSORBOARD_DIR: "D:/usr/pras/result/human-activity/mocap/tensorboard_cfgrnn/"
+  DROPOUT: [0.3, 0.5]
+  N_CLASS: 11
+  T: 20
+  terminal:
+    units: 60
+  bin_operator:
+    units: 60
+  un_operator:
+    units: 60
+
+
 
