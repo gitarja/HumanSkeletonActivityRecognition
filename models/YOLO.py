@@ -4,7 +4,7 @@ class YOLO:
     def __init__(self, weights, config):
         self.dnn = cv2.dnn.readNet(weights, config)
         self.dnn.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
-        self.dnn.setPreferableTarget(cv2.dnn.DNN_TARGET_OPENCL)
+        self.dnn.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
 
     def get_output_layers(self, net):
         layer_names = self.net.getLayerNames()
@@ -20,3 +20,5 @@ class YOLO:
         outs = self.dnn.forward()
 
         return outs
+
+

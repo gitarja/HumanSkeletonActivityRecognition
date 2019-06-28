@@ -57,6 +57,9 @@ class CFGRNN(K.models.Model):
         self.then_op = K.layers.Bidirectional(
             K.layers.SimpleRNN(units=conf["bin_operator"]["units"], return_sequences=True, name="then_op"),
             merge_mode="ave")
+        self.with_op = K.layers.Bidirectional(
+            K.layers.SimpleRNN(units=conf["bin_operator"]["units"], return_sequences=True, name="with_op"),
+            merge_mode="ave")
 
         #self.e = K.layers.TimeDistributed(K.layers.Dense(units=1, activation=None, name="equation"))
         self.e = K.layers.Dense(units=1, activation=None, name="equation")
@@ -118,7 +121,7 @@ class CFGRNN(K.models.Model):
         rh = self.rh(rh)
         t = self.t(t)
 
-        E = self.AND(self.AND(self.mF(lf), self.mF(rf)), self.OR(self.AND(self.mS(lh), self.mS(rh)), self.mS(t)))
+        E = self.AND(self.mF(lf), self.AND(self.mS(lh), self.WITH(self.mS(t)), self.mS(rh)), self.mF(rf))
 
         return E
 
@@ -129,7 +132,7 @@ class CFGRNN(K.models.Model):
         rh = self.rh(rh)
         t = self.t(t)
 
-        E = self.AND(self.AND(self.mF(lf), self.mF(rf)), self.OR(self.AND(self.mF(lh), self.mF(rh)), self.mS(t)))
+        E = self.AND(self.mF(lf), self.AND(self.mF(lh), self.WITH(self.mS(t)), self.mF(rh)), self.mF(rf))
 
         return E
 
@@ -144,7 +147,7 @@ class CFGRNN(K.models.Model):
     def wavingR(self, rh):
         rh = self.rh(rh)
 
-        E = self.mF(rh)
+        E = self.WITH(self.mF(rh))
 
         return E
 
@@ -152,7 +155,7 @@ class CFGRNN(K.models.Model):
         lh = self.lh(lh)
         rh = self.rh(rh)
 
-        E = self.AND(self.TOUCH(lh, rh), self.AND(self.forward(lh), self.forward(rh)))
+        E = self.TOUCH(lh, self.AND(self.forward(lh), self.forward(rh)), rh)
 
         return E
 
@@ -177,16 +180,12 @@ class CFGRNN(K.models.Model):
         rh = self.rh(rh)
         t = self.t(t)
 
-        E = self.AND(self.forward(t), self.AND(self.mF(lh), self.mF(rh)))
+        E = self.WITH(self.AND(self.forward(lh), self.forward(rh)), self.forward(t))
 
         return E
 
     def sitDown(self, lh, rh, t):
-        lh = self.lh(lh)
-        rh = self.rh(rh)
-        t = self.t(t)
-
-        E = self.opp(self.AND(self.mF(t), self.AND(self.mF(lh), self.mF(rh))))
+        E = self.opp(self.standUp(lh, rh, t))
 
         return E
 
@@ -195,7 +194,7 @@ class CFGRNN(K.models.Model):
         rh = self.rh(rh)
         t = self.t(t)
 
-        E = self.AND(self.mF(t), self.AND(self.mF(lh), self.mF(rh)))
+        E = self.WITH(self.AND(self.mF(lh), self.mF(rh)), self.mF(t))
 
         return E
 
@@ -212,14 +211,28 @@ class CFGRNN(K.models.Model):
 
         return self.classifier(e)
 
-    def AND(self, x1, x2):
-        return self.and_op(self.concat([x1, x2]))
+    def AND(self, x1, x2, end=None):
+        end = self.NONE(x1, end)
+        return self.and_op(self.concat([x1, x2, end]))
 
-    def OR(self, x1, x2):
-        return self.or_op(self.concat([x1, x2]))
+    def OR(self, x1, x2, end=None):
+        end = self.NONE(x1, end)
+        return self.or_op(self.concat([x1, x2, end]))
 
-    def TOUCH(self, x1, x2):
-        return self.touch_op(self.concat([x1, x2]))
+    def TOUCH(self, x1, x2, end=None):
+        end = self.NONE(x1, end)
+        return self.touch_op(self.concat([x1, x2, end]))
 
-    def THEN(self, x1, x2):
-        return self.then_op(self.concat([x1, x2]))
+    def THEN(self, x1, x2, end=None):
+        end = self.NONE(x1, end)
+        return self.then_op(self.concat([x1, x2, end]))
+
+    def WITH(self, x1, end=None):
+        end = self.NONE(x1, end)
+        return self.with_op(self.concat([x1, end]))
+
+
+    def NONE(self,x, end):
+        if end == None:
+            return tf.zeros(x.shape)
+        return end
