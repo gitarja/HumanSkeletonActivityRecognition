@@ -78,12 +78,11 @@ with summary_writer.as_default(), summary.always_record_summaries():
                     [y_jump, y_jumpJ, y_bend, y_punch, y_wav, y_wavR, y_clap, y_throw, y_sitTstand, y_sitdown, y_standUp
                      ], axis=-1)
 
-                y_prob = tf.nn.sigmoid(y)
+                y_prob = tf.nn.softmax(y)
 
                 # print(t)
 
-                # loss = tf.losses.softmax_cross_entropy(logits=y, onehot_labels=t)
-                loss = tf.losses.sigmoid_cross_entropy(logits=y, multi_class_labels=t) + 0.7 * tf.reduce_mean(tf.abs(tf.reduce_sum(y_prob, axis=1) - 1))
+                loss = tf.losses.softmax_cross_entropy(logits=y, onehot_labels=t)
 
                 training_acc += tf.reduce_mean(
                     tf.cast(tf.equal(tf.argmax(y_prob, 1), tf.argmax(t, 1)), dtype=tf.float32))
@@ -115,8 +114,8 @@ with summary_writer.as_default(), summary.always_record_summaries():
                 [y_jump, y_jumpJ, y_bend, y_punch, y_wav, y_wavR, y_clap, y_throw, y_sitTstand, y_sitdown, y_standUp
                  ], axis=-1)
 
-            y_prob = tf.nn.sigmoid(y)
-            validation_loss += tf.losses.sigmoid_cross_entropy(logits=y, multi_class_labels=t) + 0.7 * tf.reduce_mean(tf.abs(tf.reduce_sum(y_prob, axis=1) - 1))
+            y_prob = tf.nn.softmax(y)
+            validation_loss += tf.losses.softmax_cross_entropy(logits=y, onehot_labels=t)
 
             validation_acc += tf.reduce_mean(
                 tf.cast(tf.equal(tf.argmax(y_prob, 1), tf.argmax(t, 1)), dtype=tf.float32))
