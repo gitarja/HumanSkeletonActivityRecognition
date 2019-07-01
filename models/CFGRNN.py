@@ -34,33 +34,33 @@ class CFGRNN(K.models.Model):
 
         self.mF = K.layers.Bidirectional(
             K.layers.SimpleRNN(units=conf["un_operator"]["units"], return_sequences=True, name="mF"),
-            merge_mode="ave")
+            merge_mode="concat")
         self.mS = K.layers.Bidirectional(
             K.layers.SimpleRNN(units=conf["un_operator"]["units"], return_sequences=True, name="mS"),
-            merge_mode="ave")
+            merge_mode="concat")
         self.forward = K.layers.Bidirectional(
             K.layers.SimpleRNN(units=conf["un_operator"]["units"], return_sequences=True, name="forward"),
-            merge_mode="ave")
+            merge_mode="concat")
 
 
         self.and_op = K.layers.Bidirectional(
             K.layers.SimpleRNN(units=conf["bin_operator"]["units"], return_sequences=True, name="and_op"),
-            merge_mode="ave")
+            merge_mode="concat")
         self.touch_op = K.layers.Bidirectional(
             K.layers.SimpleRNN(units=conf["un_operator"]["units"], return_sequences=True, name="touch_op"),
-            merge_mode="ave")
+            merge_mode="concat")
         self.or_op = K.layers.Bidirectional(
             K.layers.SimpleRNN(units=conf["bin_operator"]["units"], return_sequences=True, name="or_op"),
-            merge_mode="ave")
+            merge_mode="concat")
         self.then_op = K.layers.Bidirectional(
             K.layers.SimpleRNN(units=conf["bin_operator"]["units"], return_sequences=True, name="then_op"),
-            merge_mode="ave")
+            merge_mode="concat")
         self.with_op = K.layers.Bidirectional(
             K.layers.SimpleRNN(units=conf["bin_operator"]["units"], return_sequences=True, name="with_op"),
-            merge_mode="ave")
+            merge_mode="concat")
         self.neg_op = K.layers.Bidirectional(
             K.layers.SimpleRNN(units=conf["un_operator"]["units"], return_sequences=True, name="neg_op"),
-            merge_mode="ave")
+            merge_mode="concat")
 
         #self.e = K.layers.TimeDistributed(K.layers.Dense(units=1, activation=None, name="equation"))
         self.e = K.layers.Dense(units=1, activation=None, name="equation")
