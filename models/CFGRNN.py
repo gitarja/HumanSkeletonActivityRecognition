@@ -67,7 +67,7 @@ class CFGRNN(K.models.Model):
 
         #self.classifier = K.layers.TimeDistributed(K.layers.Dense(units=conf["N_CLASS"], activation=None, name="equation"))
         self.classifier =  K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["classifier"]["units"], return_sequences=False, name="classifier"),
+            K.layers.SimpleRNN(units=conf["classifier"]["units"], return_sequences=True, name="classifier"),
             merge_mode="concat")
 
         self.concat = K.layers.Concatenate(axis=-1)
