@@ -62,17 +62,17 @@ with summary_writer.as_default(), summary.always_record_summaries():
             x, t = skeleton_generator_train.getFlow(h)
 
             with tf.GradientTape() as tape:
-                y_jump = tf.reduce_mean(cfgRNN.action(x, action="jumping"), axis=1)
-                y_jumpJ = tf.reduce_mean(cfgRNN.action(x, action="jumpingJ"), axis=1)
-                y_wav = tf.reduce_mean(cfgRNN.action(x, action="waving"), axis=1)
-                y_wavR = tf.reduce_mean(cfgRNN.action(x, action="wavingR"), axis=1)
-                y_clap = tf.reduce_mean(cfgRNN.action(x, action="clap"), axis=1)
-                y_punch = tf.reduce_mean(cfgRNN.action(x, action="punching"), axis=1)
-                y_bend = tf.reduce_mean(cfgRNN.action(x, action="bending"), axis=1)
-                y_throw = tf.reduce_mean(cfgRNN.action(x, action="throwing"), axis=1)
-                y_sitdown = tf.reduce_mean(cfgRNN.action(x, action="sitDown"), axis=1)
-                y_standUp = tf.reduce_mean(cfgRNN.action(x, action="standUp"), axis=1)
-                y_sitTstand = tf.reduce_mean(cfgRNN.action(x, action="sitDownTstandUp"), axis=1)
+                y_jump = cfgRNN.action(x, action="jumping")
+                y_jumpJ = cfgRNN.action(x, action="jumpingJ")
+                y_wav = cfgRNN.action(x, action="waving")
+                y_wavR = cfgRNN.action(x, action="wavingR")
+                y_clap = cfgRNN.action(x, action="clap")
+                y_punch = cfgRNN.action(x, action="punching")
+                y_bend = cfgRNN.action(x, action="bending")
+                y_throw = cfgRNN.action(x, action="throwing")
+                y_sitdown = cfgRNN.action(x, action="sitDown")
+                y_standUp = cfgRNN.action(x, action="standUp")
+                y_sitTstand = cfgRNN.action(x, action="sitDownTstandUp")
 
                 y = tf.concat(
                     [y_jump, y_jumpJ, y_bend, y_punch, y_wav, y_wavR, y_clap, y_throw, y_sitTstand, y_sitdown, y_standUp
@@ -98,17 +98,17 @@ with summary_writer.as_default(), summary.always_record_summaries():
         for h in range(skeleton_generator_test.num_batch):
             x, t = skeleton_generator_test.getFlow(h)
 
-            y_jump = tf.reduce_mean(cfgRNN.action(x, action="jumping"), axis=1)
-            y_jumpJ = tf.reduce_mean(cfgRNN.action(x, action="jumpingJ"), axis=1)
-            y_wav = tf.reduce_mean(cfgRNN.action(x, action="waving"), axis=1)
-            y_wavR = tf.reduce_mean(cfgRNN.action(x, action="wavingR"), axis=1)
-            y_clap = tf.reduce_mean(cfgRNN.action(x, action="clap"), axis=1)
-            y_punch = tf.reduce_mean(cfgRNN.action(x, action="punching"), axis=1)
-            y_bend = tf.reduce_mean(cfgRNN.action(x, action="bending"), axis=1)
-            y_throw = tf.reduce_mean(cfgRNN.action(x, action="throwing"), axis=1)
-            y_sitdown = tf.reduce_mean(cfgRNN.action(x, action="sitDown"), axis=1)
-            y_standUp = tf.reduce_mean(cfgRNN.action(x, action="standUp"), axis=1)
-            y_sitTstand = tf.reduce_mean(cfgRNN.action(x, action="sitDownTstandUp"), axis=1)
+            y_jump = cfgRNN.action(x, action="jumping")
+            y_jumpJ = cfgRNN.action(x, action="jumpingJ")
+            y_wav = cfgRNN.action(x, action="waving")
+            y_wavR = cfgRNN.action(x, action="wavingR")
+            y_clap = cfgRNN.action(x, action="clap")
+            y_punch = cfgRNN.action(x, action="punching")
+            y_bend = cfgRNN.action(x, action="bending")
+            y_throw = cfgRNN.action(x, action="throwing")
+            y_sitdown = cfgRNN.action(x, action="sitDown")
+            y_standUp = cfgRNN.action(x, action="standUp")
+            y_sitTstand = cfgRNN.action(x, action="sitDownTstandUp")
 
             y = tf.concat(
                 [y_jump, y_jumpJ, y_bend, y_punch, y_wav, y_wavR, y_clap, y_throw, y_sitTstand, y_sitdown, y_standUp
