@@ -21,16 +21,11 @@ class CFGRNN(K.models.Model):
         mS = Move Slow
         n = Not
         '''
-        self.lh = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="LH"), merge_mode="concat")
-        self.rh = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="RH"), merge_mode="concat")
-        self.lf = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="LF"), merge_mode="concat")
-        self.rf = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="RF"), merge_mode="concat")
-        self.t = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="T"), merge_mode="concat")
+        self.lh = K.layers.TimeDistributed(K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="lh"))
+        self.rh =  K.layers.TimeDistributed(K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="rh"))
+        self.lf =  K.layers.TimeDistributed(K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="lf"))
+        self.rf =  K.layers.TimeDistributed(K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="rf"))
+        self.t =  K.layers.TimeDistributed(K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="t"))
 
         self.mF = K.layers.Bidirectional(
             K.layers.SimpleRNN(units=conf["un_operator"]["units"], return_sequences=True, name="mF"),
