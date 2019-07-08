@@ -86,7 +86,7 @@ class CFGRNN(K.models.Model):
         lf = inputs[:, :, 58:76]
         rf = inputs[:, :, 75:94]
         if action == "jumping":
-            E = self.jumping(lf, lh, rf, rh, t)
+            E = self.jumping(lf, rf, t)
         elif action == "jumpingJ":
             E = self.jumpingJ(lf, lh, rf, rh, t)
         elif action == "waving":
@@ -111,11 +111,9 @@ class CFGRNN(K.models.Model):
         return self.e(self.classifier(E))
         #return E
 
-    def jumping(self, lf, lh, rf, rh, t):
+    def jumping(self, lf, rf, t):
         lf = self.lf(lf)
-        lh = self.lh(lh)
         rf = self.rf(rf)
-        rh = self.rh(rh)
         t = self.t(t)
 
         E = self.AND(self.AND(self.mF(lf), self.mF(rf)),  self.WITH(self.mS(t)))
