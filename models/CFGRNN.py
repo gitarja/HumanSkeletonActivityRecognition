@@ -92,7 +92,7 @@ class CFGRNN(K.models.Model):
         elif action == "waving":
             E = self.waving(lh, rh)
         elif action == "wavingR":
-            E = self.wavingR(rh)
+            E = self.wavingR(lh, rh)
         elif action == "clap":
             E = self.clap(lh, rh)
         elif action == "punching":
@@ -102,11 +102,11 @@ class CFGRNN(K.models.Model):
         elif action == "throwing":
             E = self.throwing(lh, rh)
         elif action == "sitDown":
-            E = self.sitDown(lh, rh, t)
+            E = self.sitDown(lf, rf, t)
         elif action == "standUp":
-            E = self.standUp(lh, rh, t)
+            E = self.standUp(lf, rf, t)
         elif action == "sitDownTstandUp":
-            E = self.sitDownTstandUP(lh, rh, t)
+            E = self.sitDownTstandUP(lf, rf, t)
 
         return self.e(self.classifier(E))
         #return E
@@ -142,10 +142,11 @@ class CFGRNN(K.models.Model):
 
         return E
 
-    def wavingR(self, rh):
+    def wavingR(self, lh, rh):
         rh = self.rh(rh)
+        lh = self.rh(lh)
 
-        E = self.WITH(self.mF(rh))
+        E = self.AND(self.mF(rh), self.NEG(self.mF(lh)))
 
         return E
 
@@ -182,24 +183,24 @@ class CFGRNN(K.models.Model):
 
         return E
 
-    def sitDown(self, lh, rh, t):
-        E = self.NEG(self.standUp(lh, rh, t))
+    def sitDown(self, lf, rf, t):
+        E = self.NEG(self.standUp(lf, rf, t))
 
         return E
 
-    def standUp(self, lh, rh, t):
-        lh = self.lh(lh)
-        rh = self.rh(rh)
+    def standUp(self, lf, rf, t):
+        lf = self.lh(lf)
+        rf = self.rh(rf)
         t = self.t(t)
 
-        E = self.AND(self.AND(self.mF(lh), self.mF(rh)), self.mF(t))
+        E = self.AND(self.AND(self.mF(lf), self.mF(rf)), self.mF(t))
 
         return E
 
-    def sitDownTstandUP(self, lh, rh, t):
+    def sitDownTstandUP(self, lf, rf, t):
 
-        sitDown = self.sitDown(lh, rh, t)
-        standUp = self.standUp(lh, rh, t)
+        sitDown = self.sitDown(lf, rf, t)
+        standUp = self.standUp(lf, rf, t)
 
         E = self.THEN(sitDown, standUp)
 
