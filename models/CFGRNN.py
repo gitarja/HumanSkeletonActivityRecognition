@@ -189,8 +189,8 @@ class CFGRNN(K.models.Model):
         return E
 
     def standUp(self, lf, rf, t):
-        lf = self.lh(lf)
-        rf = self.rh(rf)
+        lf = self.lf(lf)
+        rf = self.rf(rf)
         t = self.t(t)
 
         E = self.AND(self.AND(self.mF(lf), self.mF(rf)), self.mF(t))
