@@ -118,7 +118,7 @@ class CFGRNN(K.models.Model):
         rh = self.rh(rh)
         t = self.t(t)
 
-        E = self.AND(self.AND(self.mF(lf), self.mF(rf)), self.AND(self.AND(self.mS(lh), self.mS(rh)), self.WITH(self.mS(t))))
+        E = self.AND(self.AND(self.mF(lf), self.mF(rf)),  self.WITH(self.mS(t)))
 
         return E
 
