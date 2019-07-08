@@ -5,7 +5,7 @@ import os
 import yaml
 import tensorflow as tf
 class SkeletonGenerator(Generator):
-    def __init__(self, batch_size, dataset_path, skeleton_path, t=0, n_class=0, train=False, dt_type=None):
+    def __init__(self, batch_size, dataset_path, skeleton_path, t=0, n_class=0, train=False, dt_type=None, simple_complex=False):
         '''
 
         :param batch_size:
@@ -20,6 +20,10 @@ class SkeletonGenerator(Generator):
 
         self.skeleton_path = skeleton_path
         self.dt_type = dt_type
+
+        if simple_complex:
+            self.data_set = self.data_set[(self.data_set["action"] == 5) & (self.data_set["action"] == 6) & (self.data_set["action"] == 8) & (self.data_set["action"] == 11)]
+            self.len_data = len(self.data_set.index)
 
     def getFlow(self, batch_index):
         if (batch_index + 1) * self.batch_size > len(self.data_set.index):

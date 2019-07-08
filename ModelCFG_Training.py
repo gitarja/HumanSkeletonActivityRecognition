@@ -31,6 +31,8 @@ PREV_BEST = 0
 # --------------------------Generator-----------------------#
 skeleton_generator_train = SkeletonGenerator(batch_size=BATCH_SIZE, dataset_path=TRAINDATASET_PATH,
                                              skeleton_path=SKELETON_PATH, t=T, n_class=N_CLASS)
+skeleton_generator_train_complex = SkeletonGenerator(batch_size=BATCH_SIZE, dataset_path=TRAINDATASET_PATH,
+                                             skeleton_path=SKELETON_PATH, t=T, n_class=N_CLASS, simple_complex=True)
 skeleton_generator_test = SkeletonGenerator(batch_size=VALIDATION_BATCH_SIZE, dataset_path=TESTDATASET_PATH,
                                             skeleton_path=SKELETON_PATH, t=T, n_class=N_CLASS)
 
@@ -51,7 +53,7 @@ status = check_point.restore(manager.latest_checkpoint)
 # ---------------------------------------------Tensorboard configuration---------------------------------#
 summary_writer = summary.create_file_writer(TENSORBOARD_DIR)
 
-with summary_writer.as_default(), summary.always_record_summaries():
+with summary.always_record_summaries():
     for i in range(1, NUM_ITER):
         training_loss = 0
         training_acc = 0
@@ -59,7 +61,10 @@ with summary_writer.as_default(), summary.always_record_summaries():
         validation_acc = 0
         skeleton_generator_train.suffle()
         for h in range(skeleton_generator_train.num_batch):
-            x, t = skeleton_generator_train.getFlow(h)
+            if i < 5:
+                x, t = skeleton_generator_train_complex.getFlow(h)
+            else:
+                x, t = skeleton_generator_train.getFlow(h)
 
             with tf.GradientTape() as tape:
                 y_jump = cfgRNN.action(x, action="jumping")
