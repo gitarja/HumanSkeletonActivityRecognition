@@ -80,11 +80,11 @@ class CFGRNN(K.models.Model):
               [57:75] = left_leg
               [75:93] = right_leg
         """""
-        t = inputs[:, :, 3:21]
-        lh = inputs[:, :, 39:57]
-        rh = inputs[:, :, 21:39]
-        lf = inputs[:, :, 57:75]
-        rf = inputs[:, :, 75:93]
+        t = inputs[:, :, 4:22]
+        lh = inputs[:, :, 40:58]
+        rh = inputs[:, :, 22:40]
+        lf = inputs[:, :, 58:76]
+        rf = inputs[:, :, 75:94]
         if action == "jumping":
             E = self.jumping(lf, lh, rf, rh, t)
         elif action == "jumpingJ":
