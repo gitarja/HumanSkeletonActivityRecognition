@@ -41,7 +41,7 @@ conf = cfg["CFGRNN_CONFIG"]
 cfgRNN = CFGRNN(conf)
 
 # --------------------------Optimizer-----------------------#
-optimizer = tf.train.AdamOptimizer(learning_rate=LR)
+optimizer = tf.train.RMSPropOptimizer(learning_rate=LR)
 
 # ---------------------------------------------Check points---------------------------------------------#
 check_point = tf.train.Checkpoint(optimizer=optimizer, cfgRNN=cfgRNN, global_step=tf.train.get_or_create_global_step())
@@ -61,10 +61,10 @@ with summary.always_record_summaries():
         validation_acc = 0
         skeleton_generator_train.suffle()
         for h in range(skeleton_generator_train.num_batch):
-            if i < 5:
-                x, t = skeleton_generator_train_complex.getFlow(h)
-            else:
-                x, t = skeleton_generator_train.getFlow(h)
+            # if i % 2 == 0 & i < 7:
+            #     x, t = skeleton_generator_train_complex.getFlow(h)
+            # else:
+            x, t = skeleton_generator_train.getFlow(h)
 
             with tf.GradientTape() as tape:
                 y_jump = cfgRNN.action(x, action="jumping")
@@ -139,7 +139,8 @@ with summary.always_record_summaries():
 
         if (i - PREV_BEST) % 5 == 0 or i == 15:
             print("Learning rate is changed")
-            optimizer._lr = optimizer._lr * math.sqrt(0.2)
+            #optimizer._lr = optimizer._lr * math.sqrt(0.2)
+            optimizer._learning_rate = optimizer._learning_rate * math.sqrt(0.2)
 
         if (i - PREV_BEST) > 15:
             break
