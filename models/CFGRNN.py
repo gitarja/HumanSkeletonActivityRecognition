@@ -160,7 +160,8 @@ class CFGRNN(K.models.Model):
         lh = self.lh(lh)
         rh = self.rh(rh)
 
-        E = self.AND(self.forward(lh), self.forward(rh))
+        #E = self.AND(self.forward(lh), self.forward(rh))
+        E = self.OR(self.THEN(self.forward(lh), self.forward(rh)), self.THEN(self.forward(rh), self.forward(lh)))
 
         return E
 
