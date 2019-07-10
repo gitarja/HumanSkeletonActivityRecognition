@@ -5,6 +5,8 @@ from tensorflow.contrib import summary
 import yaml
 import os
 import math
+import numpy as np
+import pickle
 
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
@@ -52,8 +54,8 @@ status = check_point.restore(manager.latest_checkpoint)
 
 # ---------------------------------------------Tensorboard configuration---------------------------------#
 summary_writer = summary.create_file_writer(TENSORBOARD_DIR)
-
-with summary.always_record_summaries():
+training_labels = []
+with summary_writer.as_default(), summary.always_record_summaries():
     for i in range(1, NUM_ITER):
         training_loss = 0
         training_acc = 0
@@ -88,6 +90,7 @@ with summary.always_record_summaries():
                 # print(t)
 
                 loss = tf.losses.softmax_cross_entropy(logits=y, onehot_labels=t)
+                training_labels.append(np.argmax(t.numpy(), axis=1).tolist())
 
                 training_acc += tf.reduce_mean(
                     tf.cast(tf.equal(tf.argmax(y_prob, 1), tf.argmax(t, 1)), dtype=tf.float32))
@@ -96,8 +99,40 @@ with summary.always_record_summaries():
                 grads = tape.gradient(loss, variables)
 
                 clipped_grads = [tf.clip_by_norm(g, 1.) for g in grads]
+                #record the weights
+                #body parts
+
+                body_combined = tf.concat([cfgRNN.rh.weights[0], cfgRNN.lh.weights[0], cfgRNN.rf.weights[0], cfgRNN.lf.weights[0], cfgRNN.t.weights[0]], 0)
+                unary_combined = tf.concat(
+                    [cfgRNN.mF.weights[0], cfgRNN.mS.weights[0], cfgRNN.forward.weights[0]], 0)
+                binary_combined = tf.concat([cfgRNN.and_op.weights[0], cfgRNN.or_op.weights[0], cfgRNN.touch_op.weights[0], cfgRNN.then_op.weights[0], cfgRNN.with_op.weights[0], cfgRNN.neg_op.weights[0]], 0)
+                unary_combined_rec = tf.concat(
+                    [cfgRNN.mF.weights[1], cfgRNN.mS.weights[1], cfgRNN.forward.weights[1]], 0)
+                binary_combined_rec = tf.concat(
+                    [cfgRNN.and_op.weights[1], cfgRNN.or_op.weights[1], cfgRNN.touch_op.weights[1],
+                     cfgRNN.then_op.weights[1], cfgRNN.with_op.weights[1], cfgRNN.neg_op.weights[1]], 0)
+
+                summary.histogram("body_combined", body_combined,
+                                  step=tf.train.get_or_create_global_step())
+                summary.histogram("unary_combined", unary_combined,
+                                  step=tf.train.get_or_create_global_step())
+                summary.histogram("binary_combined", binary_combined,
+                                  step=tf.train.get_or_create_global_step())
+                summary.histogram("unary_combined_rec", unary_combined_rec,
+                                  step=tf.train.get_or_create_global_step())
+                summary.histogram("binary_combined_rec", binary_combined_rec,
+                                  step=tf.train.get_or_create_global_step())
+
+
+
+
+
+
+
                 optimizer.apply_gradients(zip(clipped_grads, variables),
                                           global_step=tf.train.get_or_create_global_step())
+
+
             training_loss += loss
 
         for h in range(skeleton_generator_test.num_batch):
@@ -137,9 +172,16 @@ with summary.always_record_summaries():
         summary.scalar("training_acc", training_acc, step=tf.train.get_or_create_global_step())
         summary.scalar("validation_acc", validation_acc, step=tf.train.get_or_create_global_step())
 
-        if (i - PREV_BEST) % 5 == 0 or i == 15:
+
+
+        if ((i - PREV_BEST) % 5 == 0 or i % 10 == 0) and i < 30:
             print("Learning rate is changed")
             #optimizer._lr = optimizer._lr * math.sqrt(0.2)
+            optimizer._learning_rate = optimizer._learning_rate / math.sqrt(0.3)
+
+        if ((i - PREV_BEST) % 5 == 0) and i > 30:
+            print("Learning rate is changed")
+            # optimizer._lr = optimizer._lr * math.sqrt(0.2)
             optimizer._learning_rate = optimizer._learning_rate * math.sqrt(0.2)
 
         if (i - PREV_BEST) > 15:
@@ -149,3 +191,6 @@ with summary.always_record_summaries():
             manager.save()
             THRESHOLD_LOSS = validation_loss
             PREV_BEST = i
+
+with open('outfile', 'wb') as fp:
+    pickle.dump(training_labels, fp)
