@@ -21,11 +21,15 @@ class CFGRNN(K.models.Model):
         mS = Move Slow
         n = Not
         '''
-        self.lh = K.layers.TimeDistributed(K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="lh"))
-        self.rh =  K.layers.TimeDistributed(K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="rh"))
-        self.lf =  K.layers.TimeDistributed(K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="lf"))
-        self.rf =  K.layers.TimeDistributed(K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="rf"))
-        self.t =  K.layers.TimeDistributed(K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="t"))
+        self.lh = K.layers.TimeDistributed(
+            K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="lh"))
+        self.rh = K.layers.TimeDistributed(
+            K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="rh"))
+        self.lf = K.layers.TimeDistributed(
+            K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="lf"))
+        self.rf = K.layers.TimeDistributed(
+            K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="rf"))
+        self.t = K.layers.TimeDistributed(K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="t"))
 
         self.mF = K.layers.Bidirectional(
             K.layers.SimpleRNN(units=conf["un_operator"]["units"], return_sequences=True, name="mF"),
@@ -36,7 +40,6 @@ class CFGRNN(K.models.Model):
         self.forward = K.layers.Bidirectional(
             K.layers.SimpleRNN(units=conf["un_operator"]["units"], return_sequences=True, name="forward"),
             merge_mode="concat")
-
 
         self.and_op = K.layers.Bidirectional(
             K.layers.SimpleRNN(units=conf["bin_operator"]["units"], return_sequences=True, name="and_op"),
@@ -57,16 +60,15 @@ class CFGRNN(K.models.Model):
             K.layers.SimpleRNN(units=conf["un_operator"]["units"], return_sequences=True, name="neg_op"),
             merge_mode="concat")
 
-        #self.e = K.layers.TimeDistributed(K.layers.Dense(units=1, activation=None, name="equation"))
+        # self.e = K.layers.TimeDistributed(K.layers.Dense(units=1, activation=None, name="equation"))
         self.e = K.layers.Dense(units=1, activation=None, name="equation")
 
-        #self.classifier = K.layers.TimeDistributed(K.layers.Dense(units=conf["N_CLASS"], activation=None, name="equation"))
-        self.classifier =  K.layers.Bidirectional(
+        # self.classifier = K.layers.TimeDistributed(K.layers.Dense(units=conf["N_CLASS"], activation=None, name="equation"))
+        self.classifier = K.layers.Bidirectional(
             K.layers.SimpleRNN(units=conf["classifier"]["units"], return_sequences=False, name="classifier"),
             merge_mode="concat")
 
         self.concat = K.layers.Concatenate(axis=-1)
-
 
         self.dropout = K.layers.Dropout(conf["DROPOUT"][0])
 
@@ -109,14 +111,14 @@ class CFGRNN(K.models.Model):
             E = self.sitDownTstandUP(lf, rf, t)
 
         return self.e(self.classifier(E))
-        #return E
+        # return E
 
     def jumping(self, lf, rf, t):
         lf = self.lf(lf)
         rf = self.rf(rf)
         t = self.t(t)
 
-        E = self.AND(self.AND(self.mF(lf), self.mF(rf)),  self.WITH(self.mS(t)))
+        E = self.AND(self.AND(self.mF(lf), self.mF(rf)), self.WITH(self.mS(t)))
 
         return E
 
@@ -160,7 +162,7 @@ class CFGRNN(K.models.Model):
         lh = self.lh(lh)
         rh = self.rh(rh)
 
-        #E = self.AND(self.forward(lh), self.forward(rh))
+        # E = self.AND(self.forward(lh), self.forward(rh))
         E = self.OR(self.THEN(self.forward(lh), self.forward(rh)), self.THEN(self.forward(rh), self.forward(lh)))
 
         return E
@@ -223,7 +225,33 @@ class CFGRNN(K.models.Model):
 
     def WITH(self, x1):
         return self.with_op(x1)
+
     def NEG(self, x1):
         return self.neg_op(x1)
 
+    def predict(self,
+                x,
+                batch_size=None,
+                verbose=0,
+                steps=None,
+                callbacks=None,
+                max_queue_size=10,
+                workers=1,
+                use_multiprocessing=True):
+        y_jump = self.action(x, action="jumping")
+        y_jumpJ = self.action(x, action="jumpingJ")
+        y_wav = self.action(x, action="waving")
+        y_wavR = self.action(x, action="wavingR")
+        y_clap = self.action(x, action="clap")
+        y_punch = self.action(x, action="punching")
+        y_bend = self.action(x, action="bending")
+        y_throw = self.action(x, action="throwing")
+        y_sitdown = self.action(x, action="sitDown")
+        y_standUp = self.action(x, action="standUp")
+        y_sitTstand = self.action(x, action="sitDownTstandUp")
 
+        y = tf.concat(
+            [y_jump, y_jumpJ, y_bend, y_punch, y_wav, y_wavR, y_clap, y_throw, y_sitTstand, y_sitdown, y_standUp
+             ], axis=-1)
+
+        return y
