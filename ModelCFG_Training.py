@@ -74,7 +74,7 @@ with summary_writer.as_default(), summary.always_record_summaries():
         training_acc = 0
         validation_loss = 0
         validation_acc = 0
-        skeleton_generator_train.suffle()
+        #skeleton_generator_train.suffle()
         # for h in range(skeleton_generator_train.num_batch):
         # if i % 2 == 0 & i < 7:
         #     x, t = skeleton_generator_train_complex.getFlow(h)
@@ -181,11 +181,14 @@ with summary_writer.as_default(), summary.always_record_summaries():
         #     optimizer._learning_rate = optimizer._learning_rate * math.sqrt(0.2)
 
 
-        if sa.acceptance_probability(validation_losses[i-2], validation_loss, T) < rn.random() or i % 3 == 0:
+        if sa.acceptance_probability(validation_losses[i-2], validation_loss, T) > rn.random():
+            optimize = False
+        else:
             optimize = True
             optimizer._learning_rate = lr_bc
-        else:
-            optimize = False
+
+        if (i % 5) == 0:
+            optimize = True
 
         print("Current learning rate is %f", optimizer._learning_rate)
 
