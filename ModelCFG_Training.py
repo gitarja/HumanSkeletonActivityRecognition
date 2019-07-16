@@ -50,7 +50,7 @@ cfgRNN = CFGRNN(conf)
 
 # --------------------------Simulated Annealing-----------------------#
 sa = SimulatedAnnealing()
-LR = sa.random_start()
+# LR = sa.random_start()
 
 # --------------------------Optimizer-----------------------#
 optimizer = tf.train.RMSPropOptimizer(learning_rate=LR)
@@ -67,7 +67,7 @@ summary_writer = summary.create_file_writer(TENSORBOARD_DIR)
 training_labels = []
 losses = []
 validation_losses = [1000, ]
-optimize = True
+optimize = False
 with summary_writer.as_default(), summary.always_record_summaries():
     for i in range(1, NUM_ITER):
         training_loss = 0
@@ -99,11 +99,13 @@ with summary_writer.as_default(), summary.always_record_summaries():
 
             # --------------------------Oprimize the learning rate using SA-----------------------#
             lr_bc = optimizer._learning_rate
+            T = sa.temperature(0.2, step=i)
+            print("The value of T is %f", T)
             if optimize:
 
-                T = sa.temperature(0.2, step=i)
-                fraction = i / float(NUM_ITER)
-                new_lr = sa.random_neighbour(optimizer._learning_rate, fraction)
+
+                #fraction = i / float(NUM_ITER)
+                new_lr = sa.random_neighbour(optimizer._learning_rate, T)
                 optimizer._learning_rate = new_lr
 
 
@@ -181,16 +183,15 @@ with summary_writer.as_default(), summary.always_record_summaries():
         #     optimizer._learning_rate = optimizer._learning_rate * math.sqrt(0.2)
 
 
-        if sa.acceptance_probability(validation_losses[i-2], validation_loss, T) > rn.random():
+        if sa.acceptance_probability(validation_losses[-2], validation_loss, T) > rn.random():
             optimize = False
+            print("Current learning rate is %f", optimizer._learning_rate)
         else:
             optimize = True
             optimizer._learning_rate = lr_bc
 
-        if (i % 5) == 0:
-            optimize = True
 
-        print("Current learning rate is %f", optimizer._learning_rate)
+
 
         if validation_loss < THRESHOLD_LOSS or i == 1:
             manager.save()

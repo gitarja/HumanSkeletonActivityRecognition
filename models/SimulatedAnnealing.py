@@ -20,9 +20,9 @@ class SimulatedAnnealing(object):
 
         #amplitude = (max(self.interval) - min(self.interval)) * fraction / 10
 
-        amplitude = (max(self.interval) - min(self.interval)) * (1 - fraction) / 10
+        amplitude = (max(self.interval) - min(self.interval)) * fraction
 
-        delta = (-amplitude/2.) + amplitude * rn.random_sample()
+        delta = (-amplitude/2.) + amplitude * rn.uniform(low=fraction, high=1., size=(1,))[0]
 
         return self.clip(x + delta)
 
@@ -33,7 +33,7 @@ class SimulatedAnnealing(object):
 
         else:
             p = math.exp(-(new_cost - cost) / temperature)
-            print("P value =%f", p)
+            #print("P value =%f", p)
             return p
 
 
