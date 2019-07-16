@@ -18,7 +18,9 @@ class SimulatedAnnealing(object):
 
     def random_neighbour(self, x, fraction=1):
 
-        amplitude = (max(self.interval) - min(self.interval)) * fraction / 10
+        #amplitude = (max(self.interval) - min(self.interval)) * fraction / 10
+
+        amplitude = (max(self.interval) - min(self.interval)) * (1 - fraction) / 10
 
         delta = (-amplitude/2.) + amplitude * rn.random_sample()
 
