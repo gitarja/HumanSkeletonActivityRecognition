@@ -93,7 +93,7 @@ with summary_writer.as_default(), summary.always_record_summaries():
             variables = teacher_model.trainable_variables
             grads = tape.gradient(loss, variables)
 
-            clipped_grads = [tf.clip_by_norm(g, 3.) for g in grads]
+            clipped_grads = [tf.clip_by_norm(g, 1.) for g in grads]
             optimizer.apply_gradients(zip(clipped_grads, variables), global_step=tf.train.get_or_create_global_step())
         #training_loss += loss
 
