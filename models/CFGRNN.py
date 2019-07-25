@@ -4,7 +4,7 @@ from tensorflow import keras as K
 
 class CFGRNN(K.models.Model):
 
-    def __init__(self, conf):
+    def __init__(self, conf, average=False):
         super().__init__()
 
         # body parts-variable
@@ -60,13 +60,17 @@ class CFGRNN(K.models.Model):
             K.layers.SimpleRNN(units=conf["un_operator"]["units"], return_sequences=True, name="neg_op"),
             merge_mode="concat")
 
-        # self.e = K.layers.TimeDistributed(K.layers.Dense(units=1, activation=None, name="equation"))
-        self.e = K.layers.Dense(units=1, activation=None, name="equation")
 
-        # self.classifier = K.layers.TimeDistributed(K.layers.Dense(units=conf["N_CLASS"], activation=None, name="equation"))
-        self.classifier = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["classifier"]["units"], return_sequences=False, name="classifier"),
-            merge_mode="concat")
+
+
+        if average:
+            self.classifier = K.layers.Bidirectional(
+                K.layers.SimpleRNN(units=conf["classifier"]["units"], return_sequences=True, name="classifier"),
+                merge_mode="concat")
+            self.e = K.layers.TimeDistributed(K.layers.Dense(units=1, activation=None, name="equation"))
+        else:
+            self.e = K.layers.Dense(units=1, activation=None, name="equation")
+            self.classifier = K.layers.TimeDistributed(K.layers.Dense(units=conf["N_CLASS"], activation=None, name="equation"))
 
         self.concat = K.layers.Concatenate(axis=-1)
 
@@ -112,6 +116,37 @@ class CFGRNN(K.models.Model):
 
         return self.e(self.classifier(E))
         # return E
+
+    def actionOpenpTrack(self, inputs, action="still"):
+        """"
+              array size (21, 2)
+              [3:21] = trunk
+              [39:57] = left_arm
+              [21:39] = right_arm
+              [57:75] = left_leg
+              [75:93] = right_leg
+        """""
+        t = inputs[:, :, 0:16]
+        lh = inputs[:, :, 16:31]
+        rh = inputs[:, :, 31:46]
+        lf = inputs[:, :, 46:61]
+        rf = inputs[:, :, 61:76]
+
+
+        if action == "sitDown":
+            E = self.sitDown(lf, rf, t)
+        elif action == "walk":
+            E = self.walk(lf, rf)
+        elif action == "run":
+            E = self.run(lf, rf)
+        elif action == "movingBox":
+            E = self.movingBox(lf, lh, rf, rh)
+        elif action == "none":
+            E = self.none(lf, lh, rf, rh, t)
+
+        return self.e(self.classifier(E))
+
+
 
     def jumping(self, lf, rf, t):
         lf = self.lf(lf)
@@ -207,6 +242,37 @@ class CFGRNN(K.models.Model):
 
         return E
 
+    def walk(self, lf, rf):
+        lf = self.lf(lf)
+        rf = self.rf(rf)
+
+        E = self.AND(self.mS(lf), self.mS(rf))
+
+        return E
+
+    def run(self, lf, rf):
+        lf = self.lf(lf)
+        rf = self.rf(rf)
+
+        E = self.AND(self.mF(lf), self.mF(rf))
+
+        return E
+
+    def movingBox(self, lf, lh, rf, rh):
+        lh = self.lh(lh)
+        rh = self.rh(rh)
+
+        E = self.AND(self.AND(self.forward(rh), self.forward(lh)), self.walk(lf, rf))
+
+        return E
+
+    def none(self,  lf, lh, rf, rh, t):
+        not_walk_run = self.AND(self.NEG(self.walk(lf, rf)), self.NEG(self.run(lf, rf)))
+        not_sit_moveBox = self.AND(self.NEG(self.sitDown(lf, rf, t)), self.NEG(self.movingBox(lf, lh, rf, rh)))
+        E = self.AND(not_walk_run, not_sit_moveBox)
+
+        return E
+
     def classify(self, e):
 
         return self.classifier(e)
@@ -252,6 +318,21 @@ class CFGRNN(K.models.Model):
 
         y = tf.concat(
             [y_jump, y_jumpJ, y_bend, y_punch, y_wav, y_wavR, y_clap, y_throw, y_sitTstand, y_sitdown, y_standUp
+             ], axis=-1)
+
+        return y
+
+
+    def predictOpenPTrack(self, x):
+        y_walk = self.actionOpenpTrack(x, action="walk")
+        y_run = self.actionOpenpTrack(x, action="run")
+        y_movingBox = self.actionOpenpTrack(x, action="movingBox")
+        y_sitdown = self.actionOpenpTrack(x, action="sitDown")
+        y_none = self.actionOpenpTrack(x, action="none")
+
+
+        y = tf.concat(
+            [y_none, y_sitdown, y_run,  y_walk, y_movingBox
              ], axis=-1)
 
         return y
