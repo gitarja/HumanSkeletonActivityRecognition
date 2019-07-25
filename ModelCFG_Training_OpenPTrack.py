@@ -36,18 +36,18 @@ LR = cfg["LR"]
 NUM_ITER = 1000
 THRESHOLD_LOSS = 1e+13
 PREV_BEST = 0
-AVERAGE = False
+AVERAGE = True
 
 # --------------------------Generator-----------------------#
 skeleton_generator_train = OpenPTrackGenerator(batch_size=BATCH_SIZE, dataset_path=TRAINDATASET_PATH,
-                                             skeleton_path=OPENPTRACK_PATH, t=T, n_class=N_CLASS)
+                                             skeleton_path=OPENPTRACK_PATH, t=T, n_class=N_CLASS, average=AVERAGE)
 
 skeleton_generator_test = OpenPTrackGenerator(batch_size=VALIDATION_BATCH_SIZE, dataset_path=TESTDATASET_PATH,
-                                            skeleton_path=OPENPTRACK_PATH, t=T, n_class=N_CLASS)
+                                            skeleton_path=OPENPTRACK_PATH, t=T, n_class=N_CLASS, average=AVERAGE)
 
 # --------------------------Model-----------------------#
 conf = cfg["CFGRNN_CONFIG"]
-cfgRNN = CFGRNN(conf)
+cfgRNN = CFGRNN(conf, average=AVERAGE)
 
 # --------------------------Simulated Annealing-----------------------#
 sa = SimulatedAnnealing()
@@ -85,14 +85,22 @@ with summary_writer.as_default(), summary.always_record_summaries():
 
             # print(t)
 
-            loss = tf.losses.softmax_cross_entropy(logits=y, onehot_labels=t, weights=w)
-            #add loss to vocabulary
-            losses.append(loss)
-            training_labels.append(np.argmax(t.numpy(), axis=1).tolist())
+
+
 
             if AVERAGE:
                 training_acc = tf.reduce_mean(
+                    tf.cast(tf.equal(tf.argmax(y_prob, 1), tf.argmax(t, 1)), dtype=tf.float32))
+                loss = tf.losses.softmax_cross_entropy(logits=y, onehot_labels=t)
+
+            else:
+                training_acc = tf.reduce_mean(
                     tf.cast(tf.equal(tf.argmax(y_prob, 2), tf.argmax(t, 2)), dtype=tf.float32))
+                loss = tf.losses.softmax_cross_entropy(logits=y, onehot_labels=t, weights=w)
+
+            # add loss to vocabulary
+            losses.append(loss)
+            training_labels.append(np.argmax(t.numpy(), axis=1).tolist())
 
             # --------------------------Oprimize the learning rate using SA-----------------------#
             lr_bc = optimizer._lr
@@ -129,6 +137,9 @@ with summary_writer.as_default(), summary.always_record_summaries():
             validation_loss += tf.losses.softmax_cross_entropy(logits=y, onehot_labels=t)
 
             if AVERAGE:
+                validation_acc += tf.reduce_mean(
+                    tf.cast(tf.equal(tf.argmax(y_prob, 1), tf.argmax(t, 1)), dtype=tf.float32))
+            else:
                 validation_acc += tf.reduce_mean(
                     tf.cast(tf.equal(tf.argmax(y_prob, 2), tf.argmax(t, 2)), dtype=tf.float32))
 

@@ -64,13 +64,16 @@ class CFGRNN(K.models.Model):
 
 
         if average:
+            self.e = K.layers.Dense(units=1, activation=None, name="equation")
+            self.classifier = K.layers.Bidirectional(
+                K.layers.SimpleRNN(units=conf["classifier"]["units"], return_sequences=False, name="classifier"),
+                merge_mode="concat")
+
+        else:
             self.classifier = K.layers.Bidirectional(
                 K.layers.SimpleRNN(units=conf["classifier"]["units"], return_sequences=True, name="classifier"),
                 merge_mode="concat")
             self.e = K.layers.TimeDistributed(K.layers.Dense(units=1, activation=None, name="equation"))
-        else:
-            self.e = K.layers.Dense(units=1, activation=None, name="equation")
-            self.classifier = K.layers.TimeDistributed(K.layers.Dense(units=conf["N_CLASS"], activation=None, name="equation"))
 
         self.concat = K.layers.Concatenate(axis=-1)
 
