@@ -7,7 +7,7 @@ import numpy as np
 
 class OpenPTrackGenerator(Generator):
 
-    def __init__(self, batch_size, dataset_path, skeleton_path, t=0, n_class=0, train=False, average=False):
+    def __init__(self, batch_size, dataset_path, skeleton_path, t=0, n_class=0, train=False, average=False, mean = None, std = None):
         '''
              :param batch_size:
              :param dataset_path:
@@ -22,7 +22,13 @@ class OpenPTrackGenerator(Generator):
         self.skeleton_path = skeleton_path
         self.average = average
         self.preprocessing = SkeletonPreProcessing()
+        if mean is not None:
+            self.mean = np.loadtxt(mean, delimiter=",")
+        if std is not None:
+            self.std = np.loadtxt(std, delimiter=",")
 
+    def normalize(self, skeletons):
+        return (skeletons - self.mean) / (self.std + 1.e-13)
     def openSkeleton(self,subject, filename):
         filepath = os.path.join(self.skeleton_path+subject, str(filename)+".pkl")
         pickle_in = open(filepath, "rb")
@@ -42,7 +48,7 @@ class OpenPTrackGenerator(Generator):
         for index, row in data.iterrows():
 
             skeletons = np.array([self.openSkeleton(subject=row.subject, filename=filename) for filename in range(row.time_min, row.time_max)])
-            skeletons = self.preprocessing.smoothing(skeletons)
+            skeletons = self.preprocessing.smoothing(self.normalize(skeletons))
             x.append(tf.convert_to_tensor(skeletons, dtype=tf.float32))
             labels.append(row["class"])
             weights.append(row["weight"])

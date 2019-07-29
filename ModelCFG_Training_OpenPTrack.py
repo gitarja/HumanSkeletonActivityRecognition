@@ -27,6 +27,8 @@ VALIDATION_BATCH_SIZE = cfg["CFGRNN_CONFIG"]["VALIDATION_BATCH_SIZE"]
 OPENPTRACK_PATH = cfg["DIR_OPENPTRACK"]
 TRAINDATASET_PATH = os.path.join(OPENPTRACK_PATH, cfg["OPENPTRACK_CONFIG"]["TRAINDATASET"])
 TESTDATASET_PATH = os.path.join(OPENPTRACK_PATH, cfg["OPENPTRACK_CONFIG"]["TESTDATASET"])
+MEAN_FILE_PATH = os.path.join(OPENPTRACK_PATH, cfg["OPENPTRACK_CONFIG"]["MEANFILE"])
+STD_FILE_PATH = os.path.join(OPENPTRACK_PATH, cfg["OPENPTRACK_CONFIG"]["STDFILE"])
 
 CHECK_POINT_DIR = cfg["OPENPTRACK_CONFIG"]["CHECK_POINT_DIR"]
 TENSORBOARD_DIR = cfg["OPENPTRACK_CONFIG"]["TENSORBOARD_DIR"]
@@ -40,10 +42,10 @@ AVERAGE = True
 
 # --------------------------Generator-----------------------#
 skeleton_generator_train = OpenPTrackGenerator(batch_size=BATCH_SIZE, dataset_path=TRAINDATASET_PATH,
-                                             skeleton_path=OPENPTRACK_PATH, t=T, n_class=N_CLASS, average=AVERAGE)
+                                             skeleton_path=OPENPTRACK_PATH, t=T, n_class=N_CLASS, average=AVERAGE, mean=MEAN_FILE_PATH, std=STD_FILE_PATH)
 
 skeleton_generator_test = OpenPTrackGenerator(batch_size=VALIDATION_BATCH_SIZE, dataset_path=TESTDATASET_PATH,
-                                            skeleton_path=OPENPTRACK_PATH, t=T, n_class=N_CLASS, average=AVERAGE)
+                                            skeleton_path=OPENPTRACK_PATH, t=T, n_class=N_CLASS, average=AVERAGE, mean=MEAN_FILE_PATH, std=STD_FILE_PATH)
 
 # --------------------------Model-----------------------#
 conf = cfg["CFGRNN_CONFIG"]

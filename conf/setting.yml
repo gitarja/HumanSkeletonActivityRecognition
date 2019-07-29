@@ -40,6 +40,8 @@ CFGRNN_CONFIG:
 OPENPTRACK_CONFIG:
   TRAINDATASET: "dataTrain.pkl"
   TESTDATASET: "dataTest.pkl"
+  MEANFILE: "mean.csv"
+  STDFILE: "std.csv"
   CHECK_POINT_DIR: "D:/usr/pras/result/human-activity/openptrack/models_cfgrnn/"
   TENSORBOARD_DIR: "D:/usr/pras/result/human-activity/openptrack/tensorboard_cfgrnn/"
   N_CLASS: 5
