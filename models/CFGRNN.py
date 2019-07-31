@@ -21,15 +21,31 @@ class CFGRNN(K.models.Model):
         mS = Move Slow
         n = Not
         '''
-        self.lh = K.layers.TimeDistributed(
-            K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="lh"))
-        self.rh = K.layers.TimeDistributed(
-            K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="rh"))
-        self.lf = K.layers.TimeDistributed(
-            K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="lf"))
-        self.rf = K.layers.TimeDistributed(
-            K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="rf"))
-        self.t = K.layers.TimeDistributed(K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="t"))
+        # self.lh = K.layers.TimeDistributed(
+        #     K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="lh"))
+        # self.rh = K.layers.TimeDistributed(
+        #     K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="rh"))
+        # self.lf = K.layers.TimeDistributed(
+        #     K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="lf"))
+        # self.rf = K.layers.TimeDistributed(
+        #     K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="rf"))
+        # self.t = K.layers.TimeDistributed(K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="t"))
+
+        self.lh = K.layers.Bidirectional(
+            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="lh"),
+            merge_mode="ave")
+        self.rh = K.layers.Bidirectional(
+            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="rh"),
+            merge_mode="ave")
+        self.lf = K.layers.Bidirectional(
+            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="lf"),
+            merge_mode="ave")
+        self.rf = K.layers.Bidirectional(
+            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="rf"),
+            merge_mode="ave")
+        self.t = K.layers.Bidirectional(
+            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="t"),
+            merge_mode="ave")
 
         self.mF = K.layers.Bidirectional(
             K.layers.SimpleRNN(units=conf["un_operator"]["units"], return_sequences=True, name="mF"),
