@@ -30,13 +30,13 @@ CFGRNN_CONFIG:
   N_CLASS: 11
   T: 40
   classifier:
-    units: 30
+    units: 60
   terminal:
-    units: 30
+    units: 60
   bin_operator:
-    units: 60
+    units: 128
   un_operator:
-    units: 60
+    units: 128
 OPENPTRACK_CONFIG:
   TRAINDATASET: "dataTrain.pkl"
   TESTDATASET: "dataTest.pkl"

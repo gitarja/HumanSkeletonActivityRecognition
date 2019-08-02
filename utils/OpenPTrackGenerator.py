@@ -46,12 +46,14 @@ class OpenPTrackGenerator(Generator):
         labels = []
         weights = []
         for index, row in data.iterrows():
-
-            skeletons = np.array([self.openSkeleton(subject=row.subject, filename=filename) for filename in range(row.time_min, row.time_max)])
+            sequences = np.arange(row.time_min - row.time_min, row.time_max - row.time_min,
+                                   int((row.time_max - row.time_min) / self.T))
+            skeletons = np.array([self.openSkeleton(subject=row.subject, filename=filename) for filename in range(row.time_min, row.time_max, int((row.time_max - row.time_min) / self.T))])
             skeletons = self.preprocessing.smoothing(self.normalize(skeletons))
             x.append(tf.convert_to_tensor(skeletons, dtype=tf.float32))
-            labels.append(row["class"])
-            weights.append(row["weight"])
+            #labels.append(row["class"])
+            labels.append(row["class"][sequences])
+            weights.append(row["weight"][sequences])
 
         x = tf.stack(x, axis=0)
         y = np.array(labels).flatten()
