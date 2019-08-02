@@ -7,7 +7,7 @@ import numpy as np
 
 class OpenPTrackGenerator(Generator):
 
-    def __init__(self, batch_size, dataset_path, skeleton_path, t=0, n_class=0, train=False, average=False, mean = None, std = None):
+    def __init__(self, batch_size, dataset_path, skeleton_path, t=0, n_class=0, train=False, average=False, mean = None, std = None, sampling_rate=30.0):
         '''
              :param batch_size:
              :param dataset_path:
@@ -26,6 +26,10 @@ class OpenPTrackGenerator(Generator):
             self.mean = np.loadtxt(mean, delimiter=",")
         if std is not None:
             self.std = np.loadtxt(std, delimiter=",")
+
+        self.order = 6
+        self.sampling_rate = sampling_rate
+        self.cutoff = 3.5
 
     def normalize(self, skeletons):
         return (skeletons - self.mean) / (self.std + 1.e-13)
@@ -49,7 +53,7 @@ class OpenPTrackGenerator(Generator):
             sequences = np.arange(row.time_min - row.time_min, row.time_max - row.time_min,
                                    int((row.time_max - row.time_min) / self.T))
             skeletons = np.array([self.openSkeleton(subject=row.subject, filename=filename) for filename in range(row.time_min, row.time_max, int((row.time_max - row.time_min) / self.T))])
-            skeletons = self.preprocessing.smoothing(self.normalize(skeletons))
+            skeletons = self.preprocessing.butter_lowpass_filter(self.preprocessing.smoothing(self.normalize(skeletons)), self.cutoff, self.sampling_rate)
             x.append(tf.convert_to_tensor(skeletons, dtype=tf.float32))
             #labels.append(row["class"])
             labels.append(row["class"][sequences])

@@ -1,5 +1,5 @@
 import numpy as np
-
+from scipy.signal import butter, lfilter, freqz
 
 class SkeletonPreProcessing:
 
@@ -308,3 +308,14 @@ class SkeletonPreProcessing:
             person.joints.coordinateDist()
 
         return person
+
+    def butter_lowpass(self, cutoff, fs, order=5):
+        nyq = 0.5 * fs
+        normal_cutoff = cutoff / nyq
+        b, a = butter(order, normal_cutoff, btype='lowpass', analog=False)
+        return b, a
+
+    def butter_lowpass_filter(self, data, cutoff, fs, order=5):
+        b, a = self.butter_lowpass(cutoff, fs, order=order)
+        y = lfilter(b, a, data)
+        return y
