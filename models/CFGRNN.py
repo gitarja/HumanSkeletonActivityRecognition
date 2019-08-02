@@ -32,48 +32,48 @@ class CFGRNN(K.models.Model):
         # self.t = K.layers.TimeDistributed(K.layers.Dense(units=conf["terminal"]["units"], activation="relu", name="t"))
 
         self.lh = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="lh"),
+            K.layers.CuDNNLSTM(units=conf["terminal"]["units"], return_sequences=True, name="lh"),
             merge_mode="ave")
         self.rh = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="rh"),
+            K.layers.CuDNNLSTM(units=conf["terminal"]["units"], return_sequences=True, name="rh"),
             merge_mode="ave")
         self.lf = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="lf"),
+            K.layers.CuDNNLSTM(units=conf["terminal"]["units"], return_sequences=True, name="lf"),
             merge_mode="ave")
         self.rf = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="rf"),
+            K.layers.CuDNNLSTM(units=conf["terminal"]["units"], return_sequences=True, name="rf"),
             merge_mode="ave")
         self.t = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["terminal"]["units"], return_sequences=True, name="t"),
+            K.layers.CuDNNLSTM(units=conf["terminal"]["units"], return_sequences=True, name="t"),
             merge_mode="ave")
 
         self.mF = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["un_operator"]["units"], return_sequences=True, name="mF"),
+            K.layers.CuDNNLSTM(units=conf["un_operator"]["units"], return_sequences=True, name="mF"),
             merge_mode="concat")
         self.mS = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["un_operator"]["units"], return_sequences=True, name="mS"),
+            K.layers.CuDNNLSTM(units=conf["un_operator"]["units"], return_sequences=True, name="mS"),
             merge_mode="concat")
         self.forward = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["un_operator"]["units"], return_sequences=True, name="forward"),
+            K.layers.CuDNNLSTM(units=conf["un_operator"]["units"], return_sequences=True, name="forward"),
             merge_mode="concat")
 
         self.and_op = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["bin_operator"]["units"], return_sequences=True, name="and_op"),
+            K.layers.CuDNNLSTM(units=conf["bin_operator"]["units"], return_sequences=True, name="and_op"),
             merge_mode="concat")
         self.touch_op = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["un_operator"]["units"], return_sequences=True, name="touch_op"),
+            K.layers.CuDNNLSTM(units=conf["un_operator"]["units"], return_sequences=True, name="touch_op"),
             merge_mode="concat")
         self.or_op = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["bin_operator"]["units"], return_sequences=True, name="or_op"),
+            K.layers.CuDNNLSTM(units=conf["bin_operator"]["units"], return_sequences=True, name="or_op"),
             merge_mode="concat")
         self.then_op = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["bin_operator"]["units"], return_sequences=True, name="then_op"),
+            K.layers.CuDNNLSTM(units=conf["bin_operator"]["units"], return_sequences=True, name="then_op"),
             merge_mode="concat")
         self.with_op = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["bin_operator"]["units"], return_sequences=True, name="with_op"),
+            K.layers.CuDNNLSTM(units=conf["bin_operator"]["units"], return_sequences=True, name="with_op"),
             merge_mode="concat")
         self.neg_op = K.layers.Bidirectional(
-            K.layers.SimpleRNN(units=conf["un_operator"]["units"], return_sequences=True, name="neg_op"),
+            K.layers.CuDNNLSTM(units=conf["un_operator"]["units"], return_sequences=True, name="neg_op"),
             merge_mode="concat")
 
 
@@ -82,12 +82,12 @@ class CFGRNN(K.models.Model):
         if average:
             self.e = K.layers.Dense(units=1, activation=None, name="equation")
             self.classifier = K.layers.Bidirectional(
-                K.layers.SimpleRNN(units=conf["classifier"]["units"], return_sequences=False, name="classifier"),
+                K.layers.CuDNNLSTM(units=conf["classifier"]["units"], return_sequences=False, name="classifier"),
                 merge_mode="concat")
 
         else:
             self.classifier = K.layers.Bidirectional(
-                K.layers.SimpleRNN(units=conf["classifier"]["units"], return_sequences=True, name="classifier"),
+                K.layers.CuDNNLSTM(units=conf["classifier"]["units"], return_sequences=True, name="classifier"),
                 merge_mode="concat")
             self.e = K.layers.TimeDistributed(K.layers.Dense(units=1, activation=None, name="equation"))
 
