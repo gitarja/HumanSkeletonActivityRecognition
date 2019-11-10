@@ -102,11 +102,11 @@ class HBRNN:
                   [57:75] = left_leg
                   [75:93] = right_leg
             """""
-            x0 = inputs[:, :, 0:16]
-            x1 = inputs[:, :, 16:31]
-            x2 = inputs[:, :, 31:46]
-            x3 = inputs[:, :, 46:61]
-            x4 = inputs[:, :, 61:76]
+            x0 = inputs[:, :, 0:10]
+            x1 = inputs[:, :, 10:19]
+            x2 = inputs[:, :, 19:28]
+            x3 = inputs[:, :, 28:37]
+            x4 = inputs[:, :, 37:45]
 
             # 1st layer
             x1_1 = self.rnn1_1(x0)
