@@ -145,11 +145,11 @@ class CFGRNN(K.models.Model):
               [57:75] = left_leg
               [75:93] = right_leg
         """""
-        t = inputs[:, :, 0:16]
-        lh = inputs[:, :, 16:31]
-        rh = inputs[:, :, 31:46]
-        lf = inputs[:, :, 46:61]
-        rf = inputs[:, :, 61:76]
+        t = inputs[:, :, 0:9]
+        lh = inputs[:, :, 9:18]
+        rh = inputs[:, :, 18:27]
+        lf = inputs[:, :, 27:36]
+        rf = inputs[:, :, 36:45]
 
 
         if action == "sitDown":
